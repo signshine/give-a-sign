@@ -1,0 +1,11 @@
+{
+    "db": {
+        "database": "test.db"
+    },
+    "server": {
+        "httpPort": 8080,
+        "secret": "my-secret",
+        "authExpMin": 30,
+        "authExpRefreshMin": 300
+    }
+}
