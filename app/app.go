@@ -44,7 +44,7 @@ func NewMustApp(cfg config.Config) App {
 
 func (a *app) setDB() error {
 	db, err := sqlite.NewSQLiteGormConnection(sqlite.DBConnOptions{
-		DBName: "test.db",
+		DBName: a.cfg.DB.Database,
 	})
 
 	if err != nil {
