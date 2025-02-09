@@ -26,3 +26,6 @@ go.work.sum
 
 # IDE workspace file
 .vscode
+
+# config file
+config.json
