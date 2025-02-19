@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/signshine/give-a-sign/config"
+	"github.com/signshine/give-a-sign/internal/language"
+	langPort "github.com/signshine/give-a-sign/internal/language/port"
 	"github.com/signshine/give-a-sign/internal/user"
 	userPort "github.com/signshine/give-a-sign/internal/user/port"
 	wordPort "github.com/signshine/give-a-sign/internal/word/port"
@@ -20,6 +22,7 @@ type app struct {
 	cfg         config.Config
 	wordService wordPort.Service
 	userService userPort.Service
+	langService langPort.Service
 }
 
 func NewApp(cfg config.Config) (App, error) {
@@ -55,6 +58,8 @@ func (a *app) setDB() error {
 
 	err = db.AutoMigrate(
 		&types.User{},
+		&types.Language{},
+		&types.SignLanguage{},
 	)
 
 	if err != nil {
@@ -91,4 +96,20 @@ func (a *app) UserService(ctx context.Context) userPort.Service {
 
 func userServiceWithDB(db *gorm.DB) userPort.Service {
 	return user.NewService(storage.NewUserRepo(db))
+}
+
+func (a *app) LanguageService(ctx context.Context) langPort.Service {
+	db := appCtx.GetDB(ctx)
+	if db == nil {
+		if a.langService == nil {
+			a.langService = languageServiceWithDB(a.db)
+		}
+		return a.langService
+	}
+
+	return languageServiceWithDB(db)
+}
+
+func languageServiceWithDB(db *gorm.DB) langPort.Service {
+	return language.NewService(storage.NewLanguageRepo(db))
 }
