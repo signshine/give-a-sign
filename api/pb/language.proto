@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+option go_package = "github.com/signshine/give-a-sign/api/pb";
+
+
+message Error {
+    string message = 1; // Error message.
+    int32 code = 2;     // Error code.
+}
+
+message Language {
+    uint64 id = 1;
+    string uuid = 2;
+    string name = 3;
+}
+
+message LanguageFilter {
+    uint64 id = 1;       // Filter by ID (optional).
+    string uuid = 2;     // Filter by UUID (optional).
+    string name = 3;     // Filter by name (optional).
+}
+
+message GetLanguageRequest {
+    LanguageFilter filter = 1; // Filter criteria for the query.
+}
+
+message GetLanguageResponse {
+    Language language = 1; // The language that matches the filter.
+    Error error = 2;
+}
+
+message ListLanguagesRequest {
+    reserved 1;
+    // LanguageFilter filter = 1; 
+    int32 page = 2;            // Pagination: page number.
+    int32 pageSize = 3;       // Pagination: number of items per page.
+}
+
+message ListLanguagesResponse {
+    repeated Language languages = 1; 
+    int32 totalCount = 2;           
+    Error error = 3;
+}
+
+message CreateLanguageRequest {
+    string name = 1; // Name of the language to create.
+}
+
+message CreateLanguageResponse {
+    Language language = 1; // The created language.
+    Error error = 2;
+}
+
+message UpdateLanguageRequest {
+    uint64 id = 1;   // ID of the language to update.
+    string name = 2; // New name for the language.
+}
+
+message UpdateLanguageResponse {
+    Language language = 1; // The updated language.
+    Error error = 2;
+}
+
+message DeleteLanguageRequest {
+    LanguageFilter filter = 1; // Filter criteria for deletion.
+}
+
+message DeleteLanguageResponse {
+    bool success = 1; // Whether the deletion was successful.
+    Error error = 2;
+}
+
+
+message SignLanguage {
+    uint64 id = 1;
+    string uuid = 2;
+    string name = 3;
+}
+
+message SignLanguageFilter {
+    uint64 id = 1;       // Filter by ID (optional).
+    string uuid = 2;     // Filter by UUID (optional).
+    string name = 3;     // Filter by name (optional).
+}
+
+message GetSignLanguageRequest {
+    SignLanguageFilter filter = 1; // Filter criteria for the query.
+}
+
+message GetSignLanguageResponse {
+    SignLanguage language = 1; // The language that matches the filter.
+    Error error = 2;
+}
+
+message ListSignLanguagesRequest {
+    reserved 1;
+    // SignLanguageFilter filter = 1; 
+    int32 page = 2;            // Pagination: page number.
+    int32 pageSize = 3;       // Pagination: number of items per page.
+}
+
+message ListSignLanguagesResponse {
+    repeated SignLanguage languages = 1; 
+    int32 totalCount = 2;           
+    Error error = 3;
+}
+
+message CreateSignLanguageRequest {
+    string name = 1; // Name of the language to create.
+}
+
+message CreateSignLanguageResponse {
+    SignLanguage language = 1; // The created language.
+    Error error = 2;
+}
+
+message UpdateSignLanguageRequest {
+    uint64 id = 1;   // ID of the language to update.
+    string name = 2; // New name for the language.
+}
+
+message UpdateSignLanguageResponse {
+    SignLanguage language = 1; // The updated language.
+    Error error = 2;
+}
+
+message DeleteSignLanguageRequest {
+    SignLanguageFilter filter = 1; // Filter criteria for deletion.
+}
+
+message DeleteSignLanguageResponse {
+    bool success = 1; // Whether the deletion was successful.
+    Error error = 2;
+}

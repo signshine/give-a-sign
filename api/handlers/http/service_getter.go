@@ -24,3 +24,10 @@ func WordServiceGetter(app app.App) serviceGetter[*service.WordService] {
 		return service.NewWordService(app.WordService(ctx))
 	}
 }
+
+// LanguageServiceGetter return a transient instance handler
+func LanguageServiceGetter(app app.App) serviceGetter[*service.LanguageService] {
+	return func(ctx context.Context) *service.LanguageService {
+		return service.NewLanguageService(app.LanguageService(ctx))
+	}
+} 
