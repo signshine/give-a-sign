@@ -30,7 +30,7 @@ type Video struct {
 	UUID           VideoUUID
 	Path           string
 	WordID         wordDomain.WordID
-	SignLanguageID langDomain.LanguageID
+	SignLanguageID langDomain.SignLanguageID
 }
 
 func (v *Video) Validate() error {
