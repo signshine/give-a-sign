@@ -7,6 +7,7 @@ import (
 
 	"github.com/signshine/give-a-sign/internal/language/domain"
 	"github.com/signshine/give-a-sign/internal/language/port"
+	// appCtx "github.com/signshine/give-a-sign/pkg/context"
 )
 
 var (
@@ -17,6 +18,7 @@ var (
 	ErrLanguageNotFound           = errors.New("language not found")
 	ErrLanguageOnGetAll           = errors.New("error on getting all language")
 	ErrLanguageOnDelete           = errors.New("error on deleting language")
+	ErrLanguageAlreadyExist       = errors.New("language already exists")
 
 	ErrSignLanguageOnCreate           = errors.New("error on creating new sign language")
 	ErrSignLanguageCreationValidation = errors.New("sign language validation failed")
@@ -25,6 +27,7 @@ var (
 	ErrSignLanguageNotFound           = errors.New("sign language not found")
 	ErrSignLanguageOnGetAll           = errors.New("error on getting all sign language")
 	ErrSignLanguageOnDelete           = errors.New("error on deleting sign language")
+	ErrSignLanguageAlreadyExist       = errors.New("sign language already exists")
 
 	ErrPaginationNegativePage     = errors.New("pagination error: page cannot be negative")
 	ErrPaginationNegativePageSize = errors.New("pagination error: page size cannot be negative")
@@ -39,12 +42,18 @@ func NewService(repo port.Repo) port.Service {
 }
 
 func (s *service) CreateLanguage(ctx context.Context, lang domain.Language) (domain.LanguageID, error) {
+	// logger := appCtx.GetLogger(ctx)
+
 	if err := lang.Validate(); err != nil {
 		return 0, fmt.Errorf("%w: %w", ErrLanguageCreationValidation, err)
 	}
 
 	id, err := s.repo.CreateLanguage(ctx, lang)
 	if err != nil {
+		// logger.Debug(err.Error())
+		if errors.Is(err, ErrLanguageAlreadyExist) {
+			return 0, ErrLanguageAlreadyExist
+		}
 		return 0, ErrLanguageOnCreate
 	}
 
@@ -58,6 +67,10 @@ func (s *service) CreateSignLanguage(ctx context.Context, lang domain.SignLangua
 
 	id, err := s.repo.CreateSignLanguage(ctx, lang)
 	if err != nil {
+		// log
+		if errors.Is(err, ErrSignLanguageAlreadyExist) {
+			return 0, ErrSignLanguageAlreadyExist
+		}
 		return 0, ErrSignLanguageOnCreate
 	}
 

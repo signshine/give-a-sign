@@ -23,6 +23,8 @@ type (
 	LanguageUUID = uuid.UUID
 )
 
+var NilUUID = LanguageUUID{}
+
 func ValidateLanguageUUID(id LanguageUUID) error {
 	if err := uuid.Validate(id.String()); err != nil {
 		return ErrInvalidLanguageUUID
