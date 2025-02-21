@@ -40,8 +40,14 @@ func registerLanguageAPI(router fiber.Router, app app.App) {
 	languageSvcGetter := LanguageServiceGetter(app)
 	secret := []byte(app.Config().Server.Secret)
 	router.Use(newAuthMiddleware(secret))
+
 	router.Post("/languages", setTransaction(app.DB()), CreateLanguage(languageSvcGetter))
 	router.Get("/languages", setTransaction(app.DB()), GetListLanguage(languageSvcGetter))
 	router.Get("/languages/filter", setTransaction(app.DB()), GetLanguage(languageSvcGetter))
-	router.Delete("/languages/filter", setTransaction(app.DB()), DeleteLanguage(languageSvcGetter))
+	router.Delete("/languages", setTransaction(app.DB()), DeleteLanguage(languageSvcGetter))
+
+	router.Post("/sign-languages", setTransaction(app.DB()), CreateSignLanguage(languageSvcGetter))
+	router.Get("/sign-languages", setTransaction(app.DB()), GetListSignLanguage(languageSvcGetter))
+	router.Get("/sign-languages/filter", setTransaction(app.DB()), GetSignLanguage(languageSvcGetter))
+	router.Delete("/sign-languages", setTransaction(app.DB()), DeleteSignLanguage(languageSvcGetter))
 }
