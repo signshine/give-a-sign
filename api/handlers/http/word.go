@@ -1,91 +1,137 @@
 package http
 
-// import (
-// 	// "strconv"
+import (
+	"errors"
 
-// 	"github.com/signshine/give-a-sign/api/service"
+	"github.com/gofiber/fiber/v2"
+	"github.com/signshine/give-a-sign/api/pb"
+	"github.com/signshine/give-a-sign/api/service"
+	"github.com/signshine/give-a-sign/pkg/context"
+)
 
-// 	"github.com/gofiber/fiber/v2"
-// )
+func CreateWord(svcGetter serviceGetter[*service.WordService]) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var req pb.CreateWordRequest
 
-// type WordHandler struct {
-// 	svc *service.WordService
-// }
+		if err := c.BodyParser(&req); err != nil {
+			return fiber.ErrBadRequest
+		}
 
-// func NewWordHandler(service *service.WordService) *WordHandler {
-// 	return &WordHandler{
-// 		svc: service,
-// 	}
-// }
+		logger := context.GetLogger(c.UserContext())
+		svc := svcGetter(c.UserContext())
 
-// func (h *WordHandler) AddWord(c *fiber.Ctx) error {
-// 	var req presenter.Word
+		resp, err := svc.CreateWord(c.UserContext(), &req)
+		if err != nil {
+			logger.Error(err.Error())
 
-// 	if err := c.BodyParser(&req); err != nil {
-// 		return fiber.ErrBadRequest
-// 	}
+			if errors.Is(err, service.ErrWordAlreadyExist) {
+				return fiber.NewError(fiber.StatusUnprocessableEntity, err.Error())
+			}
+			if errors.Is(err, service.ErrWordOnCreate) {
+				return fiber.ErrBadRequest
+			}
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
 
-// 	word := presenter.WordPresenter2Domain(&req)
-// 	resp, err := h.svc.CreateWord(c.UserContext(), *word)
-// 	if err != nil {
-// 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-// 	}
+		return c.JSON(resp)
+	}
+}
 
-// 	return c.JSON(map[string]interface{}{
-// 		"message": "success",
-// 		"id":      resp,
-// 	})
-// }
+func GetWord(svcGetter serviceGetter[*service.WordService]) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		logger := context.GetLogger(c.UserContext())
+		svc := svcGetter(c.UserContext())
 
-// func (h *WordHandler) AllWords(c *fiber.Ctx) error {
-// 	page, err := c.ParamsInt("page")
-// 	if err != nil {
-// 		return fiber.ErrBadRequest
-// 	}
-// 	_ = page
+		var req pb.GetWordRequest
+		var filter pb.WordFilter
 
-// 	pageSize, err := c.ParamsInt("pageSize")
-// 	if err != nil {
-// 		return fiber.ErrBadRequest
-// 	}
-// 	_ = pageSize
+		errBody := c.BodyParser(&req)
+		errQuery := c.QueryParser(&filter)
+		if errBody != nil && errQuery != nil {
+			return fiber.ErrBadRequest
+		}
 
-// 	panic("unimplemented")
-// }
+		if req.Filter == nil {
+			req.Filter = &filter
+		}
 
-// func (h *WordHandler) GetWordById(c *fiber.Ctx) error {
-// 	panic("unimplemented")
-// }
+		resp, err := svc.GetWord(c.UserContext(), &req)
+		if err != nil {
+			logger.Error(err.Error())
 
-// func (h *WordHandler) AddVideo(c *fiber.Ctx) error {
-// 	var req presenter.Video
+			if errors.Is(err, service.ErrWordNotFound) {
+				return fiber.NewError(fiber.StatusNotFound, err.Error())
+			}
+			if errors.Is(err, service.ErrWordFilterValidation) {
+				return fiber.NewError(fiber.StatusBadRequest, err.Error())
+			}
 
-// 	if err := c.BodyParser(&req); err != nil {
-// 		return fiber.ErrBadRequest
-// 	}
+			return fiber.ErrInternalServerError
+		}
 
-// 	wordId, err := strconv.Atoi(c.Params("wordId"))
-// 	if wordId == 0 && err != nil {
-// 		return fiber.ErrBadRequest
-// 	}
-// 	req.WordID = uint(wordId)
+		return c.JSON(resp)
+	}
+}
 
-// 	video := presenter.VideoPresenter2Domain(&req)
-// 	resp, err := h.svc.CreateVideo(c.UserContext(), *video)
-// 	if err != nil {
-// 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-// 	}
+func GetListWord(svcGetter serviceGetter[*service.WordService]) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		logger := context.GetLogger(c.UserContext())
+		svc := svcGetter(c.UserContext())
 
-// 	return c.JSON(map[string]interface{}{
-// 		"message": "success",
-// 		"videoId": resp,
-// 	})
-// }
+		var req pb.ListWordRequest
 
-// func (h *WordHandler) AllVideos(c *fiber.Ctx) error {
-// 	panic("unimplemented")
-// }
+		if err := c.BodyParser(&req); err != nil {
+			return fiber.ErrBadRequest
+		}
 
-// func (h *WordHandler) GetVideoById(c *fiber.Ctx) error {
-// 	panic("unimplemented")
-// }
+		resp, err := svc.GetAllWords(c.UserContext(), &req)
+		if err != nil {
+			logger.Error(err.Error())
+
+			if errors.Is(err, service.ErrPaginationNegativePage) || 
+			errors.Is(err, service.ErrPaginationNegativePagesize) {
+				return fiber.NewError(fiber.StatusBadRequest, err.Error())
+			}
+
+			return fiber.ErrInternalServerError
+		}
+
+		return c.JSON(resp)
+	}
+}
+
+func DeleteWord(svcGetter serviceGetter[*service.WordService]) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		logger := context.GetLogger(c.UserContext())
+		svc := svcGetter(c.UserContext())
+
+		var req pb.DeleteWordRequest
+		var filter pb.WordFilter
+
+		errBody := c.BodyParser(&req)
+		errQuery := c.QueryParser(&filter)
+		if errBody != nil && errQuery != nil {
+			return fiber.ErrBadRequest
+		}
+
+		if req.Filter == nil {
+			req.Filter = &filter
+		}
+
+		resp, err := svc.DeleteWord(c.UserContext(), &req)
+		if err != nil {
+			logger.Error(err.Error())
+
+			if errors.Is(err, service.ErrWordNotFound) {
+				return fiber.NewError(fiber.StatusNotFound, err.Error())
+			}
+			if errors.Is(err, service.ErrWordFilterValidation) {
+				return fiber.NewError(fiber.StatusBadRequest, err.Error())
+			}
+
+			return fiber.ErrInternalServerError
+		}
+
+		return c.JSON(resp)
+	}
+}

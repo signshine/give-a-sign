@@ -10,10 +10,11 @@ type (
 )
 
 type Word struct {
-	ID         WordID
-	UUID       WordUUID
-	Name       string
-	LanguageID WordID
+	ID          WordID
+	UUID        WordUUID
+	Name        string
+	EnglishName string
+	LanguageID  WordID
 }
 
 func (w *Word) IsValid() bool {

@@ -21,12 +21,14 @@ func Run(app app.App) error {
 func registerAPI(router fiber.Router, app app.App) {
 	registerAuthAPI(router, app)
 	registerLanguageAPI(router, app)
+	registerWordAPI(router, app)
 }
 
 func registerAuthAPI(router fiber.Router, app app.App) {
 	userSvcGetter := UserServiceGetter(app, app.Config().Server)
 	router.Post("/sign-up", setTransaction(app.DB()), SignUp(userSvcGetter))
 	router.Post("/sign-in", setTransaction(app.DB()), SignIn(userSvcGetter))
+
 	secret := []byte(app.Config().Server.Secret)
 	router.Get("/test-auth", newAuthMiddleware(secret), func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
@@ -50,4 +52,15 @@ func registerLanguageAPI(router fiber.Router, app app.App) {
 	router.Get("/sign-languages", setTransaction(app.DB()), GetListSignLanguage(languageSvcGetter))
 	router.Get("/sign-languages/filter", setTransaction(app.DB()), GetSignLanguage(languageSvcGetter))
 	router.Delete("/sign-languages", setTransaction(app.DB()), DeleteSignLanguage(languageSvcGetter))
+}
+
+func registerWordAPI(router fiber.Router, app app.App) {
+	WordServiceGetter := WordServiceGetter(app)
+	// secret := []byte(app.Config().Server.Secret)
+	// router.Use(newAuthMiddleware(secret))
+
+	router.Post("/words", setTransaction(app.DB()), CreateWord(WordServiceGetter))
+	router.Get("/words", setTransaction(app.DB()), GetListWord(WordServiceGetter))
+	router.Get("/words/filter", setTransaction(app.DB()), GetWord(WordServiceGetter))
+	router.Delete("/words", setTransaction(app.DB()), DeleteWord(WordServiceGetter))
 }

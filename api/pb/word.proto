@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+option go_package = "github.com/signshine/give-a-sign/api/pb";
+
+message Word {
+    uint64 id = 1;
+    string uuid = 2;
+    string name = 3;
+    string englishName = 4;
+    uint64 languageId = 5;
+}
+
+message WordFilter {
+    uint64 id = 1;
+    string uuid = 2;
+    string name = 3; 
+    uint64 languageId = 4;
+}
+
+message CreateWordRequest {
+    string name = 1;
+    string englishName = 2;
+    uint64 languageId = 3;
+}
+
+message CreateWordResponse {
+    Word word = 1;
+}
+
+message GetWordRequest {
+    WordFilter filter = 1;
+}
+
+message GetWordResponse {
+    Word word = 1;
+}
+
+message UpdateWordRequest {
+    uint64 id = 1;          // ID of the word to update.
+    string name = 2;        // New name for the word.
+    string englishName = 3; // new english name for the word.
+    string languageId = 4;
+}
+
+message UpdateWordResponse {
+    Word word = 1; 
+}
+
+message DeleteWordRequest {
+    WordFilter filter = 1;
+}
+
+message DeleteWordResponse {
+    bool success = 1;
+}
+
+message ListWordRequest {
+    reserved 1;
+    // WordFilter filter = 1; 
+    uint32 page = 2;            // Pagination: page number.
+    uint32 pageSize = 3;       // Pagination: number of items per page.
+}
+
+message ListWordResponse {
+    repeated Word words = 1; 
+    uint32 totalCount = 2;           
+}

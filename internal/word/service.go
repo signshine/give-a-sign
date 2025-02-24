@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/signshine/give-a-sign/internal/word/domain"
 	"github.com/signshine/give-a-sign/internal/word/port"
@@ -18,6 +17,7 @@ var (
 	ErrWordNotFound           = errors.New("word not found")
 	ErrWordOnGetAll           = errors.New("error on getting all words")
 	ErrWordOnDelete           = errors.New("error on deleting word")
+	ErrWordAlreadyExist       = errors.New("word already exists")
 
 	ErrPaginationNegativePage     = errors.New("pagination error: page cannot be negative")
 	ErrPaginationNegativePageSize = errors.New("pagination error: page size cannot be negative")
@@ -38,7 +38,7 @@ func (s *service) CreateWord(ctx context.Context, word domain.Word) (domain.Word
 
 	id, err := s.repo.CreateWord(ctx, word)
 	if err != nil {
-		log.Printf("")
+		// log
 		return 0, fmt.Errorf("%w, %w", ErrWordOnCreate, err)
 	}
 

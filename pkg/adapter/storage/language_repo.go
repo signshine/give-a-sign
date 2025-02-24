@@ -184,11 +184,7 @@ func (r *languageRepo) DeleteLanguage(ctx context.Context, filter domain.Languag
 		q = q.Where("name = ?", filter.Name)
 	}
 
-	err := q.Delete(&types.Language{}).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return q.Delete(&types.Language{}).Error
 }
 
 func (r *languageRepo) DeleteSignLanguage(ctx context.Context, filter domain.SignLanguageFilter) error {

@@ -8,6 +8,7 @@ import (
 	langPort "github.com/signshine/give-a-sign/internal/language/port"
 	"github.com/signshine/give-a-sign/internal/user"
 	userPort "github.com/signshine/give-a-sign/internal/user/port"
+	"github.com/signshine/give-a-sign/internal/word"
 	wordPort "github.com/signshine/give-a-sign/internal/word/port"
 	"github.com/signshine/give-a-sign/pkg/adapter/storage"
 	"github.com/signshine/give-a-sign/pkg/adapter/storage/types"
@@ -60,6 +61,7 @@ func (a *app) setDB() error {
 		&types.User{},
 		&types.Language{},
 		&types.SignLanguage{},
+		&types.Word{},
 	)
 
 	if err != nil {
@@ -76,10 +78,6 @@ func (a *app) DB() *gorm.DB {
 
 func (a *app) Config() config.Config {
 	return a.cfg
-}
-
-func (a *app) WordService(ctx context.Context) wordPort.Service {
-	return a.wordService
 }
 
 func (a *app) UserService(ctx context.Context) userPort.Service {
@@ -112,4 +110,20 @@ func (a *app) LanguageService(ctx context.Context) langPort.Service {
 
 func languageServiceWithDB(db *gorm.DB) langPort.Service {
 	return language.NewService(storage.NewLanguageRepo(db))
+}
+
+func (a *app) WordService(ctx context.Context) wordPort.Service {
+	db := appCtx.GetDB(ctx)
+	if db == nil {
+		if a.wordService == nil {
+			a.wordService = wordServiceWithDB(a.db)
+		}
+		return a.wordService
+	}
+
+	return wordServiceWithDB(db)
+}
+
+func wordServiceWithDB(db *gorm.DB) wordPort.Service {
+	return word.NewService(storage.NewWordRepo(db))
 }
